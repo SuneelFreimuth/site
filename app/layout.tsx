@@ -4,6 +4,8 @@ import {
   EB_Garamond,
   Source_Serif_4,
   Cormorant_Garamond,
+  Quintessential,
+  IBM_Plex_Serif,
 } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
@@ -31,6 +33,18 @@ const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
 });
 
+const quintessential = Quintessential({
+  variable: "--font-quintessential",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
+const ibmPlexSerif = IBM_Plex_Serif({
+  variable: "--font-ibm-plex-serif",
+  subsets: ["latin"],
+  weight: ["200", "400", "600", "700"],
+})
+
 export const metadata: Metadata = {
   title: "Suneel Freimuth",
   description: "Suneel Freimuth's personal website",
@@ -46,10 +60,11 @@ export default function RootLayout({
       <body
         className={clsx(
           "antialiased",
-          lora.className,
-          ebGaramond.className,
-          sourceSerif4.className,
-          cormorantGaramond.className,
+          // lora.className,
+          // ebGaramond.className,
+          // sourceSerif4.className,
+          // cormorantGaramond.className,
+          // quintessential.className
         )}
       >
         <NavLayout>{children}</NavLayout>
@@ -81,7 +96,7 @@ function NavLayout({ children }: { children: React.ReactNode }) {
               href: "https://github.com/SuneelFreimuth",
               content: (
                 <span className="flex items-center gap-1">
-                  <Image src={icons.github} alt="Github logo" width={20} height={20} className="h-[1rem] inline" />
+                  <Image src={icons.github} alt="Github logo" width={20} height={20} className="h-[1rem] inline dark:invert w-auto" />
                   Github
                 </span>
               ),
