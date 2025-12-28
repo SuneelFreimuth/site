@@ -43,9 +43,8 @@ jobs:
       contents: read #This is required for actions/checkout
 
     needs: build
-    
+
     steps:
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -57,7 +56,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'suneel-personal-website'
-          slot-name: 'Production'
-          images: 'suneel.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_BB42D27A63974819A3804C3CD3B1915A }}/site:${{ github.sha }}'
-          
+          app-name: "suneel-personal-website"
+          slot-name: "Production"
+          images: "suneel.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_BB42D27A63974819A3804C3CD3B1915A }}/site:${{ github.sha }}"

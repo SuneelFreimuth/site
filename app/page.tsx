@@ -1,65 +1,233 @@
-import Image from "next/image";
+'use client';
+
+import { useSketch } from "@/components/sketch";
+import {
+  Color,
+  hslToRgb,
+  lerp,
+  lerpColors,
+  map,
+  random,
+  randomHsl,
+  rgbString,
+} from "@/lib/util";
+import { ComponentProps, useRef } from "react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div>
+      <TreeAnimation />
     </div>
   );
+}
+
+function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
+  const canvas = useRef(null);
+
+  useSketch({
+    canvas,
+    setup: (ctx) => {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      ctx.fillStyle = "#F00";
+      ctx.lineWidth = 2;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ctx.canvas.width, ctx.canvas.height);
+      ctx.stroke();
+    },
+    draw: (ctx, state) => {},
+    state: {},
+  });
+
+  const randomPrettyColorHsl = (): Color =>
+    randomHsl([0, 0.7, 0.45], [359, 1, 0.8]);
+
+  interface TreeConfig {
+    maxDepth: number;
+    lengthTrunk: number;
+    lengthScaleLeft: number;
+    lengthScaleRight: number;
+    lineWidthTrunk: number;
+    lineWidthLeaf: number;
+    angleLeft: number;
+    angleRight: number;
+    colorTrunk: Color;
+    colorLeaf: Color;
+  }
+
+  const randomTreeConfig = (
+    canvasWidth: number,
+    canvasHeight: number,
+  ): TreeConfig => {
+    const colorTipHsl = randomPrettyColorHsl();
+    const colorBaseHsl: Color = [
+      colorTipHsl[0] + (Math.random() < 0.5 ? 1 : -1) * random(60, 80),
+      colorTipHsl[1] - 0.3 * Math.random(),
+      colorTipHsl[2] - 0.2 * Math.random(),
+    ];
+
+    const angleLeft = random(Math.PI / 3, Math.PI / 10);
+    const angleRight = angleLeft + random(-0.5, 0.5);
+
+    return {
+      maxDepth: 10,
+      lengthTrunk: canvasHeight * 0.333,
+      lengthScaleLeft: random(0.55, 0.65),
+      lengthScaleRight: random(0.55, 0.65),
+      lineWidthTrunk: 0.5,
+      lineWidthLeaf: lerp(Math.pow(Math.random(), 2), 4, 10),
+      angleLeft,
+      angleRight,
+      colorTrunk: hslToRgb(colorBaseHsl),
+      colorLeaf: hslToRgb(colorTipHsl),
+    };
+  };
+
+  let config: TreeConfig;
+  let currLevel: Float32Array;
+  let nextLevel: Float32Array;
+
+  function setup(ctx: CanvasRenderingContext2D) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    config = randomTreeConfig(width, height);
+
+    currLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
+    nextLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
+  }
+
+  function draw(ctx: CanvasRenderingContext2D, frameCount: number) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    ctx.clearRect(0, 0, width, height);
+
+    drawTree(ctx, frameCount, width / 2, height, config);
+    ctx.fillStyle = "#000";
+  }
+
+  // Draws tree using level-order traversal so that all segments with the same
+  // color can be drawn as a single path.
+  function drawTree(
+    ctx: CanvasRenderingContext2D,
+    frameCount: number,
+    x: number,
+    y: number,
+    config: TreeConfig,
+  ) {
+    const {
+      maxDepth,
+      lengthTrunk,
+      lengthScaleLeft,
+      lengthScaleRight,
+      lineWidthTrunk: lineWidthMin,
+      lineWidthLeaf: lineWidthMax,
+      angleLeft,
+      angleRight,
+      colorTrunk: colorBase,
+      colorLeaf: colorTip,
+    } = config;
+    ctx.lineCap = "round";
+    currLevel[0] = x;
+    currLevel[1] = y;
+    currLevel[2] = lengthTrunk;
+    currLevel[3] = (3 / 2) * Math.PI;
+    for (let depth = 0; depth < maxDepth; depth++) {
+      ctx.beginPath();
+      ctx.strokeStyle = rgbString(
+        lerpColors(depth / maxDepth, colorBase, colorTip),
+      );
+      ctx.lineWidth = map(depth, 0, maxDepth, lineWidthMax, lineWidthMin);
+      const angleOffset =
+        0.1 * Math.sin((frameCount - 15 * Math.pow(depth, 2)) * 0.002);
+      for (let i = 0; i < 1 << depth; i++) {
+        const x = currLevel[4 * i];
+        const y = currLevel[4 * i + 1];
+        const length = currLevel[4 * i + 2];
+        const angle = currLevel[4 * i + 3];
+
+        const endX = x + length * Math.cos(angle);
+        const endY = y + length * Math.sin(angle);
+        if (lineSegmentIsVisible(ctx, x, y, endX, endY)) {
+          ctx.moveTo(x, y);
+          ctx.lineTo(endX, endY);
+        }
+
+        if (depth < maxDepth - 1) {
+          let j = 2 * i;
+          nextLevel[4 * j] = endX;
+          nextLevel[4 * j + 1] = endY;
+          nextLevel[4 * j + 2] = length * lengthScaleLeft;
+          nextLevel[4 * j + 3] = angle - angleLeft + angleOffset;
+
+          j++;
+          nextLevel[4 * j] = endX;
+          nextLevel[4 * j + 1] = endY;
+          nextLevel[4 * j + 2] = length * lengthScaleRight;
+          nextLevel[4 * j + 3] = angle + angleRight + angleOffset;
+        }
+      }
+      ctx.stroke();
+      [currLevel, nextLevel] = [nextLevel, currLevel];
+    }
+  }
+
+  const lineSegmentIsVisible = (
+    ctx: CanvasRenderingContext2D,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+  ): boolean => {
+    return true;
+    const { width, height } = ctx.canvas;
+
+    // If neither of the line segment's endpoints are visible yet it still
+    // crosses the screen, then it must cross at least one of the screen's side.
+    return (
+      inBounds(ctx, x0, y0) ||
+      inBounds(ctx, x1, y1) ||
+      intersectsHorizontalSide(x0, y0, x1, y1, 0, width) ||
+      intersectsHorizontalSide(x0, y0, x1, y1, height, width) ||
+      intersectsVerticalSide(x0, y0, x1, y1, 0, height) ||
+      intersectsVerticalSide(x0, y0, x1, y1, width, height)
+    );
+  };
+
+  const inBounds = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+  ): boolean =>
+    x >= 0 && x < ctx.canvas.width && y >= 0 && y < ctx.canvas.height;
+
+  const intersectsVerticalSide = (
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    x: number,
+    h: number,
+  ): boolean => {
+    const EPS = 0.0001;
+    const y = y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
+    return y + EPS >= 0 && y - EPS <= h;
+  };
+
+  const intersectsHorizontalSide = (
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    y: number,
+    w: number,
+  ): boolean => {
+    const EPS = 0.0001;
+    const x = x0 + ((x1 - x0) / (y1 - y0)) * (y - y0);
+    return x + EPS >= 0 && x - EPS <= w;
+  };
+
+  return <canvas ref={canvas} {...props} />;
 }
