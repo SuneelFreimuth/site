@@ -2,9 +2,6 @@ import { ReactNode } from 'react';
 
 import Link from 'next/link';
 
-import { icons } from '@/lib/assets';
-import { when } from '@/lib/util';
-
 export interface ILink {
   href: string;
   content: ReactNode;

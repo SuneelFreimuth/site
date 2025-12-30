@@ -82,3 +82,7 @@ export const patterns = {
     sun: '/patterns/aia-0304.jpg',
     blood: '/patterns/bloody-handprint.jpg',
 };
+
+export const gifs = {
+    underConstruction: '/gifs/under-construction.gif',
+};

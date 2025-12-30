@@ -6,12 +6,14 @@ import {
   Cormorant_Garamond,
   Quintessential,
   IBM_Plex_Serif,
+  Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
 import { Nav } from "@/components/nav";
-import { icons } from "@/lib/assets";
+import { gifs, icons } from "@/lib/assets";
 import Image from "next/image";
+import { ReactNode } from "react";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -43,7 +45,13 @@ const ibmPlexSerif = IBM_Plex_Serif({
   variable: "--font-ibm-plex-serif",
   subsets: ["latin"],
   weight: ["200", "400", "600", "700"],
-})
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Suneel Freimuth",
@@ -53,7 +61,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -64,16 +72,20 @@ export default function RootLayout({
           // ebGaramond.className,
           // sourceSerif4.className,
           // cormorantGaramond.className,
-          // quintessential.className
+          // quintessential.className,
+          // ibmPlexSerif.className,
+          playfairDisplay.className,
         )}
       >
-        <NavLayout>{children}</NavLayout>
+        <NavLayout>
+          <UnderConstructionLayout>{children}</UnderConstructionLayout>
+        </NavLayout>
       </body>
     </html>
   );
 }
 
-function NavLayout({ children }: { children: React.ReactNode }) {
+function NavLayout({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
@@ -96,13 +108,38 @@ function NavLayout({ children }: { children: React.ReactNode }) {
               href: "https://github.com/SuneelFreimuth",
               content: (
                 <span className="flex items-center gap-1">
-                  <Image src={icons.github} alt="Github logo" width={20} height={20} className="h-[1rem] inline dark:invert w-auto" />
+                  <Image
+                    src={icons.github}
+                    alt="Github logo"
+                    width={20}
+                    height={20}
+                    className="h-[1rem] inline dark:invert w-auto"
+                  />
                   Github
                 </span>
               ),
             },
           ]}
         />
+      </div>
+    </>
+  );
+}
+
+function UnderConstructionLayout({ children }: { children: ReactNode }) {
+  return (
+    <>
+      {children}
+      <div className="group fixed bottom-0 right-0">
+        <Image
+          src={gifs.underConstruction}
+          alt={'"Under Construction" animation'}
+          width={96}
+          height={64}
+        />
+        <div className="absolute opacity-0 group-hover:opacity-100 bottom-0 right-full px-2 text-nowrap">
+          Paint is wet
+        </div>
       </div>
     </>
   );

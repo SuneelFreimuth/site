@@ -26,20 +26,31 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
 
   useSketch({
     canvas,
-    setup: (ctx) => {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#FFF";
-      ctx.fillStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(ctx.canvas.width, ctx.canvas.height);
-      ctx.stroke();
+    setup: (ctx, { width, height }) => {
+      config = randomTreeConfig(width, height);
+
+      currLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
+      nextLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
+      // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // ctx.lineCap = "round";
+      // ctx.strokeStyle = "#FFF";
+      // ctx.fillStyle = "#000";
+      // ctx.lineWidth = 2;
+      // ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // ctx.beginPath();
+      // ctx.moveTo(0, 0);
+      // ctx.lineTo(ctx.canvas.width, ctx.canvas.height);
+      // ctx.stroke();
     },
-    draw: (ctx, state) => {},
-    state: {},
+    draw: (ctx, { width, height, frameCount }) => {
+      ctx.clearRect(0, 0, width, height);
+
+      drawTree(ctx, frameCount, width / 2, height, config);
+      ctx.fillStyle = "#000";
+    },
+    debug: {
+      showFrameRate: true,
+    }
   });
 
   const randomPrettyColorHsl = (): Color =>
@@ -90,22 +101,11 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
   let currLevel: Float32Array;
   let nextLevel: Float32Array;
 
-  function setup(ctx: CanvasRenderingContext2D) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    config = randomTreeConfig(width, height);
-
-    currLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
-    nextLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
+  function setup(ctx: CanvasRenderingContext2D, { width, height }) {
   }
 
   function draw(ctx: CanvasRenderingContext2D, frameCount: number) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    ctx.clearRect(0, 0, width, height);
-
-    drawTree(ctx, frameCount, width / 2, height, config);
-    ctx.fillStyle = "#000";
+    
   }
 
   // Draws tree using level-order traversal so that all segments with the same
