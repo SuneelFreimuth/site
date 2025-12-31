@@ -24,29 +24,20 @@ export default function Home() {
 function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
   const canvas = useRef(null);
 
+  let config: TreeConfig;
+  let currLevel: Float32Array;
+  let nextLevel: Float32Array;
+
   useSketch({
     canvas,
     setup: (ctx, { width, height }) => {
       config = randomTreeConfig(width, height);
-
       currLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
       nextLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
-      // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      // ctx.lineCap = "round";
-      // ctx.strokeStyle = "#FFF";
-      // ctx.fillStyle = "#000";
-      // ctx.lineWidth = 2;
-      // ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      // ctx.beginPath();
-      // ctx.moveTo(0, 0);
-      // ctx.lineTo(ctx.canvas.width, ctx.canvas.height);
-      // ctx.stroke();
     },
     draw: (ctx, { width, height, frameCount }) => {
       ctx.clearRect(0, 0, width, height);
-
       drawTree(ctx, frameCount, width / 2, height, config);
-      ctx.fillStyle = "#000";
     },
     debug: {
       showFrameRate: true,
@@ -97,17 +88,6 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
     };
   };
 
-  let config: TreeConfig;
-  let currLevel: Float32Array;
-  let nextLevel: Float32Array;
-
-  function setup(ctx: CanvasRenderingContext2D, { width, height }) {
-  }
-
-  function draw(ctx: CanvasRenderingContext2D, frameCount: number) {
-    
-  }
-
   // Draws tree using level-order traversal so that all segments with the same
   // color can be drawn as a single path.
   function drawTree(
@@ -129,11 +109,14 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
       colorTrunk: colorBase,
       colorLeaf: colorTip,
     } = config;
+
     ctx.lineCap = "round";
+
     currLevel[0] = x;
     currLevel[1] = y;
     currLevel[2] = lengthTrunk;
     currLevel[3] = (3 / 2) * Math.PI;
+
     for (let depth = 0; depth < maxDepth; depth++) {
       ctx.beginPath();
       ctx.strokeStyle = rgbString(

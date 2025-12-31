@@ -97,7 +97,7 @@ function NavLayout({ children }: { children: ReactNode }) {
             //   content: "Simulations",
             // },
             {
-              href: "/reading",
+              href: "/library",
               content: (
                 <span>
                   <span style={{ zIndex: 3 }}>📚</span> Library
