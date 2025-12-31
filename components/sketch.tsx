@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
 import { useViewportSize } from "@/lib/use_viewport_size";
 import { debounce } from "@/lib/util";
-import { useState, useEffect, useRef, EffectCallback, RefObject } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  EffectCallback,
+  RefObject,
+  useCallback,
+} from "react";
 
 export type BaseState = {
   // Logical width and height of canvas in CSS pixels.
@@ -95,11 +102,9 @@ export function useSketch<State extends object = {}>({
 
   useEffect(() => {
     if (!canvas) return;
-    fitCanvasToViewportDebounced(canvas, viewport);
+    fitCanvasToViewport(canvas, viewport);
   }, [canvas, viewport]);
 }
-
-const fitCanvasToViewportDebounced = debounce(200, fitCanvasToViewport);
 
 function fitCanvasToViewport(
   canvas: HTMLCanvasElement,
@@ -111,5 +116,7 @@ function fitCanvasToViewport(
   canvas.height = viewport.height * dpr;
   canvas.style.width = viewport.width + "px";
   canvas.style.height = viewport.height + "px";
+  ctx.resetTransform();
   ctx.scale(dpr, dpr);
+  console.log("Fit canvas to viewport", canvas.width, canvas.height);
 }

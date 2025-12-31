@@ -1,3 +1,5 @@
+'use client';
+
 import { JSX } from "react";
 
 export class AssertionError extends Error {}

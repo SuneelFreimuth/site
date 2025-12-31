@@ -136,6 +136,7 @@ function UnderConstructionLayout({ children }: { children: ReactNode }) {
           alt={'"Under Construction" animation'}
           width={96}
           height={64}
+          loading='eager'
         />
         <div className="absolute opacity-0 group-hover:opacity-100 bottom-0 right-full px-2 text-nowrap">
           Paint is wet
