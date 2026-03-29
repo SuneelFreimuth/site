@@ -29,8 +29,17 @@ export const cnWhen = (
 export const when = (
     cond: boolean,
     element: JSX.Element | (() => JSX.Element),
+    alternate?: JSX.Element | (() => JSX.Element),
 ): JSX.Element | null =>
-    cond ? (typeof element === "function" ? element() : element) : null;
+    cond
+        ? typeof element === "function"
+            ? element()
+            : element
+        : alternate
+          ? typeof alternate === "function"
+              ? alternate()
+              : alternate
+          : null;
 
 export function imset<T = Object>(obj: T, props: Partial<T>): T {
     return { ...structuredClone(obj), ...props };

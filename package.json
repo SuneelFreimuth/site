@@ -2,14 +2,17 @@
   "name": "site",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "format": "prettier --write .",
+    "make-palettes": "python palette.py",
     "lint": "eslint"
   },
   "dependencies": {
+    "cli-progress": "^3.12.0",
     "clsx": "^2.1.1",
     "next": "16.1.1",
     "react": "19.2.3",
@@ -23,7 +26,9 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "prettier": "^3.7.4",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

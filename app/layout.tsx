@@ -7,6 +7,7 @@ import {
   Quintessential,
   IBM_Plex_Serif,
   Playfair_Display,
+  Inter
 } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
@@ -20,37 +21,43 @@ const lora = Lora({
   subsets: ["latin"],
 });
 
-const ebGaramond = EB_Garamond({
-  variable: "--font-eb-garamond",
-  subsets: ["latin"],
-});
+// const ebGaramond = EB_Garamond({
+//   variable: "--font-eb-garamond",
+//   subsets: ["latin"],
+// });
 
-const sourceSerif4 = Source_Serif_4({
-  variable: "--font-source-serif-4",
-  subsets: ["latin"],
-});
+// const sourceSerif4 = Source_Serif_4({
+//   variable: "--font-source-serif-4",
+//   subsets: ["latin"],
+// });
 
-const cormorantGaramond = Cormorant_Garamond({
-  variable: "--font-cormorant-garamond",
-  subsets: ["latin"],
-});
+// const cormorantGaramond = Cormorant_Garamond({
+//   variable: "--font-cormorant-garamond",
+//   subsets: ["latin"],
+// });
 
-const quintessential = Quintessential({
-  variable: "--font-quintessential",
-  subsets: ["latin"],
-  weight: ["400"],
-});
+// const quintessential = Quintessential({
+//   variable: "--font-quintessential",
+//   subsets: ["latin"],
+//   weight: ["400"],
+// });
 
-const ibmPlexSerif = IBM_Plex_Serif({
-  variable: "--font-ibm-plex-serif",
-  subsets: ["latin"],
-  weight: ["200", "400", "600", "700"],
-});
+// const ibmPlexSerif = IBM_Plex_Serif({
+//   variable: "--font-ibm-plex-serif",
+//   subsets: ["latin"],
+//   weight: ["200", "400", "600", "700"],
+// });
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -75,6 +82,7 @@ export default function RootLayout({
           // quintessential.className,
           // ibmPlexSerif.className,
           playfairDisplay.className,
+          inter.className,
         )}
       >
         <NavLayout>

@@ -19,7 +19,8 @@ export function Chip({
     <span
       className={clsx(
         className,
-        'inline-block px-2 py-1 rounded-full text-md select-none',
+        'inline-flex items-center uppercase max-h-8 font-bold text-xs',
+        'px-2 py-1 gap-1 rounded-full text-md select-none tracking-widest',
       )}
       onClick={onClick}
       style={{

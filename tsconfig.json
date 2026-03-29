@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "strictNullChecks": false,
@@ -23,6 +24,9 @@
       "@/*": ["./*"]
     }
   },
+  "ts-node": {
+    "esm": true
+  },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -30,6 +34,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "palette.js"  ],
   "exclude": ["node_modules"]
 }
