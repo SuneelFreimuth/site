@@ -116,7 +116,7 @@ function Books() {
               router.push(pathname);
             }}
           >
-            <img src={icons.back} alt="back button"/>
+            <img src={icons.back} className="size-4" alt="back button"/>
             <span>ALL</span>
           </div>
           <h2>{SERIES_TITLE[selectedSeries]}</h2>
@@ -232,7 +232,7 @@ function BookEntry({
   return (
     <div className={cn(
       `p-4 flex flex-col gap-2 rounded shadow-xl shadow-[#1b0f0317]`,
-      'has-[img:hover]:scale-[102%] transition-transform duration-300 cursor-pointer',
+      'has-[img:hover]:scale-[102%] transition-transform ease-out-exp duration-1000 cursor-pointer',
       'transition-colors'
       // `text-[${fg}] bg-[${bg}99] dark:text-[${bg}] dark:bg-[${fg}99]`,
       // cnWhen(state === BookState.InProgress, 'bg-[#f8f4e6]'),
@@ -246,15 +246,24 @@ function BookEntry({
     >
       {when(
         state === BookState.InProgress,
-        <p className='h-8 uppercase font-bold'>Reading</p>,
-        <div className="h-8"/>
+        <p className='h-6 uppercase font-bold'>Reading</p>,
+        <div className="h-6"/>
+      )}
+      {when(
+        isSome(series),
+        <div className="flex pb-2 justify-center">
+          <SeriesChip
+            series={series!}
+            onClick={onSeriesChipClick}
+          />
+        </div>
       )}
       <div className='flex justify-center'>
         <img
           src={image}
           alt={`Cover of the book ${title} by ${author}`}
           aria-label={`Cover of the book ${title} by ${author}`}
-          className="h-96 hover:scale-[104%] transition-transform duration-300 shadow-xl cursor-pointer"
+          className="h-96 hover:scale-[104%] transition-transform ease-out-exp duration-1000 shadow-xl cursor-pointer"
           onClick={() => {
             if (!onMobile()) {
               onCoverClick();
@@ -263,16 +272,9 @@ function BookEntry({
         />
       </div>
       <div className='flex flex-col gap-1 items-center'>
-        <h3 className="text-xl font-extrabold">{title}</h3>
-        <h4 className="text-base font-light">{author}</h4>
+        <h3 className="text-xl font-extrabold text-center">{title}</h3>
+        <h4 className="text-base font-light text-center">{author}</h4>
         <div className=''>
-          {when(
-            isSome(series),
-            <SeriesChip
-              series={series!}
-              onClick={onSeriesChipClick}
-            />
-          )}
           <StateChip state={state}/>
         </div>
         <p dangerouslySetInnerHTML={{ __html: description }}/>
@@ -293,7 +295,9 @@ function StateChip({ state }: { state: BookState }) {
 }
 
 function SeriesChip({ series, onClick }: ComponentProps<'span'> & { series: Series }) {
-  const seriesStyle = "max-h-8 font-bold tracking-tighter shadow-md hover:scale-[1.02] transition-transform cursor-pointer";
+  const seriesStyle =
+    "max-h-8 font-bold tracking-tighter shadow-md hover:scale-[1.02] hover:bg-size-[120%_120%] " +
+    "transition-transform cursor-pointer duration-500 ease-out-exp";
   switch (series) {
     case Series.WheelOfTime:
       return (

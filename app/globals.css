@@ -12,6 +12,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  --ease-in-out-exp: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-in-exp: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-exp: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #020302;
