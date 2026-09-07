@@ -12,7 +12,7 @@ RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
-  else echo "Lockfile not found." && ls && exit 1; \
+  else echo "Lockfile not found. $(ls)" && exit 1; \
   fi
 
 
