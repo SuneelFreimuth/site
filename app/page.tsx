@@ -1,6 +1,6 @@
 'use client';
 
-import { P5Canvas, P5CanvasInstance, Sketch } from "@p5-wrapper/react";
+import { P5CanvasInstance, Sketch } from "@p5-wrapper/react";
 import {
   Color,
   hslToRgb,
