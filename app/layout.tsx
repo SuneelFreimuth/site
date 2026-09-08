@@ -15,6 +15,7 @@ import { Nav } from "@/components/nav";
 import { gifs, icons } from "@/lib/assets";
 import Image from "next/image";
 import { ReactNode } from "react";
+import { StaleCacheCleanup } from "@/components/stale_cache_cleanup";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -85,6 +86,7 @@ export default function RootLayout({
           inter.className,
         )}
       >
+        <StaleCacheCleanup />
         <NavLayout>
           <UnderConstructionLayout>{children}</UnderConstructionLayout>
         </NavLayout>
