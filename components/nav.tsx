@@ -21,9 +21,9 @@ function DesktopNav({ links }: {
       </div>
       <nav className='flex justify-end gap-2'>
         {links?.map(link => (
-          <Link key={link.href} href={link.href ?? "/"} className='pointer-events-auto p-2 rounded-md hover:bg-white/10 transition'>
+          <a key={link.href} href={link.href ?? "/"} className='pointer-events-auto p-2 rounded-md hover:bg-white/10 transition'>
             <span>{link.content}</span>
-          </Link>
+          </a>
         ))}
       </nav>
     </div>
