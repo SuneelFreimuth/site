@@ -1,20 +1,17 @@
 "use client";
 
-import { useLayoutEffect } from "react";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 export function useViewportSize() {
-  const [viewportSize, setViewportSize] = useState({
+  const viewportRef = useRef<{ width: number; height: number }>({
     width: 0,
     height: 0,
   });
 
   useLayoutEffect(() => {
     const onWindowResize = () => {
-      setViewportSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      viewportRef.current.width = window.innerWidth;
+      viewportRef.current.height = window.innerHeight;
     };
     onWindowResize();
     window.addEventListener("resize", onWindowResize);
@@ -23,5 +20,5 @@ export function useViewportSize() {
     };
   }, []);
 
-  return viewportSize;
+  return viewportRef;
 }

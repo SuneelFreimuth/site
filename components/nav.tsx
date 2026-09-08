@@ -15,13 +15,13 @@ function DesktopNav({ links }: {
   links: ILink[];
 }) {
   return (
-    <div className='flex justify-between items-center'>
+    <div className='fixed top-0 left-0 w-full p-4 flex justify-between items-center pointer-events-none'>
       <div className='flex-1'>
-        <h1 className="text-lg"><Link href="/">Suneel Freimuth</Link></h1>
+        <h1 className="text-lg"><Link href="/" className='pointer-events-auto'>Suneel Freimuth</Link></h1>
       </div>
       <nav className='flex justify-end gap-2'>
         {links?.map(link => (
-          <Link key={link.href} href={link.href} className='p-2 rounded-md hover:bg-white/10 transition'>
+          <Link key={link.href} href={link.href} className='pointer-events-auto p-2 rounded-md hover:bg-white/10 transition'>
             <span>{link.content}</span>
           </Link>
         ))}

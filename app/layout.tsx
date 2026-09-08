@@ -97,39 +97,37 @@ function NavLayout({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
-      <div className="fixed top-0 left-0 w-full p-4">
-        <Nav
-          links={[
-            // {
-            //   href: "/flow",
-            //   content: "Simulations",
-            // },
-            {
-              href: "/library",
-              content: (
-                <span>
-                  <span style={{ zIndex: 3 }}>📚</span> Library
-                </span>
-              ),
-            },
-            {
-              href: "https://github.com/SuneelFreimuth",
-              content: (
-                <span className="flex items-center gap-1">
-                  <Image
-                    src={icons.github}
-                    alt="Github logo"
-                    width={20}
-                    height={20}
-                    className="h-[1rem] inline dark:invert w-auto"
-                  />
-                  Github
-                </span>
-              ),
-            },
-          ]}
-        />
-      </div>
+      <Nav
+        links={[
+          // {
+          //   href: "/flow",
+          //   content: "Simulations",
+          // },
+          {
+            href: "/library",
+            content: (
+              <span>
+                <span style={{ zIndex: 3 }}>📚</span> Library
+              </span>
+            ),
+          },
+          {
+            href: "https://github.com/SuneelFreimuth",
+            content: (
+              <span className="flex items-center gap-1">
+                <Image
+                  src={icons.github}
+                  alt="Github logo"
+                  width={20}
+                  height={20}
+                  className="h-[1rem] inline dark:invert w-auto"
+                />
+                Github
+              </span>
+            ),
+          },
+        ]}
+      />
     </>
   );
 }

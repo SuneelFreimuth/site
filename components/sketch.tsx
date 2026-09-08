@@ -1,5 +1,6 @@
 "use client";
 
+import { useMouse } from "@/lib/use_mouse";
 import { useViewportSize } from "@/lib/use_viewport_size";
 import { debounce } from "@/lib/util";
 import {
@@ -9,6 +10,7 @@ import {
   EffectCallback,
   RefObject,
   useCallback,
+  MouseEvent
 } from "react";
 
 export type BaseState = {
@@ -24,26 +26,63 @@ export function useSketch<State extends object = {}>({
   state,
   setup,
   draw,
-  debug = {
-    showFrameRate: false,
-  },
+  debug,
 }: {
   canvas: RefObject<HTMLCanvasElement | null>;
-  // Must be able to `structuredClone` with no loss of correctness.
+  // Must be `structuredClone`-able.
   state?: State;
-  setup: (ctx: CanvasRenderingContext2D, state: BaseState) => void;
-  draw: (ctx: CanvasRenderingContext2D, state: State & BaseState) => void;
-  debug?: {
-    showFrameRate?: boolean;
-  };
+  setup: (ctx: CanvasRenderingContext2D, state: BaseState & State) => void;
+  draw: (ctx: CanvasRenderingContext2D, state: BaseState & State) => void;
+  debug: boolean;
 }) {
   const canvas = ref.current;
   const stateRef = useRef(state);
   const viewport = useViewportSize();
 
   useEffect(() => {
-    stateRef.current = state ? structuredClone(state) : null;
+    stateRef.current = state ? structuredClone(state) : undefined;
   }, [state]);
+
+  const mouseRef = useRef({
+    offsetX: 0,
+    offsetY: 0,
+  });
+  const mouse = mouseRef.current;
+
+  useMouse({
+    ref,
+    listeners: {
+      "mousemove":
+        (e) => {
+          const canvasEl = e.currentTarget as HTMLCanvasElement | null;
+          if (!canvasEl) return;
+          const rect = canvasEl.getBoundingClientRect();
+          mouse.offsetX = e.clientX - rect.left;
+          mouse.offsetY = e.clientY - rect.top;
+        }
+    }
+  });
+
+  function drawDebug(ctx: CanvasRenderingContext2D, frameCount: number, elapsed: number) {
+    { // FPS counter
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, 80, 24);
+      ctx.fillStyle = "white";
+      ctx.font = "16px sans-serif";
+      const fps = frameCount / (elapsed / 1000);
+      ctx.fillText(fps.toFixed(1) + " fps", 8, 16);
+    }
+
+    { // Mouse position
+      const text = `(${mouse.offsetX}, ${mouse.offsetY})`;
+      const { actualBoundingBoxRight, actualBoundingBoxLeft } = ctx.measureText(text)
+      ctx.fillStyle = "black";
+      ctx.fillRect(mouse.offsetX, mouse.offsetY, actualBoundingBoxRight - actualBoundingBoxLeft + 8, -24);
+      ctx.fillStyle = "white";
+      ctx.font = "16px sans-serif";
+      ctx.fillText(text, mouse.offsetX + 4, mouse.offsetY - 7);
+    }
+  }
 
   useEffect(() => {
     if (!canvas) return;
@@ -53,14 +92,15 @@ export function useSketch<State extends object = {}>({
 
     ctx.resetTransform();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    fitCanvasToViewport(canvas, viewport);
+    fitCanvasToViewport(canvas, viewport.current);
 
     setup(ctx, {
       width: canvas.width / (window.devicePixelRatio || 1),
       height: canvas.height / (window.devicePixelRatio || 1),
       time: 0,
       frameCount: 0,
-    });
+      ...(state ?? {})
+    } as State & BaseState);
 
     let t0: number;
     let frameCount = 0;
@@ -77,16 +117,11 @@ export function useSketch<State extends object = {}>({
         height: canvas.height / (window.devicePixelRatio || 1),
         time: elapsed,
         frameCount,
-        ...stateRef.current,
-      } satisfies State & BaseState);
+        ...(stateRef.current ?? {}),
+      } as State & BaseState);
 
-      if (debug?.showFrameRate) {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, 80, 24);
-        ctx.fillStyle = "white";
-        ctx.font = "16px sans-serif";
-        const fps = frameCount / (elapsed / 1000);
-        ctx.fillText(fps.toFixed(1) + " fps", 8, 16);
+      if (debug) {
+        drawDebug(ctx, frameCount, elapsed);
       }
 
       frameCount++;
@@ -102,8 +137,8 @@ export function useSketch<State extends object = {}>({
 
   useEffect(() => {
     if (!canvas) return;
-    fitCanvasToViewport(canvas, viewport);
-  }, [canvas, viewport]);
+    fitCanvasToViewport(canvas, viewport.current);
+  }, [canvas, viewport.current.width, viewport.current.height]);
 }
 
 function fitCanvasToViewport(

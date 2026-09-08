@@ -1,6 +1,6 @@
 'use client';
 
-import { useSketch } from "@/components/sketch";
+import { P5Canvas, P5CanvasInstance, Sketch } from "@p5-wrapper/react";
 import {
   Color,
   hslToRgb,
@@ -9,9 +9,8 @@ import {
   map,
   random,
   randomHsl,
-  rgbString,
 } from "@/lib/util";
-import { ComponentProps, useRef } from "react";
+import { NextReactP5Wrapper } from "@p5-wrapper/next";
 
 export default function Home() {
   return (
@@ -21,28 +20,46 @@ export default function Home() {
   );
 }
 
-function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
-  const canvas = useRef(null);
-
+function TreeAnimation() {
   let config: TreeConfig;
   let currLevel: Float32Array;
   let nextLevel: Float32Array;
 
-  useSketch({
-    canvas,
-    setup: (ctx, { width, height }) => {
-      config = randomTreeConfig(width, height);
+  const sketch: Sketch = (p) => {
+    p.setup = () => {
+      p.createCanvas(window.innerWidth, window.innerHeight);
+      p.strokeCap(p.ROUND);
+      config = randomTreeConfig(p.width, p.height);
       currLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
       nextLevel = new Float32Array(((1 << config.maxDepth) - 1) * 4);
-    },
-    draw: (ctx, { width, height, frameCount }) => {
-      ctx.clearRect(0, 0, width, height);
-      drawTree(ctx, frameCount, width / 2, height, config);
-    },
-    debug: {
-      showFrameRate: true,
-    }
-  });
+    };
+
+    p.windowResized = () => {
+      p.resizeCanvas(window.innerWidth, window.innerHeight);
+    };
+
+    p.draw = () => {
+      p.clear();
+      drawTree(p, p.frameCount, p.width / 2, p.height, config);
+      
+      { // FPS counter
+        p.fill("black");
+        p.rect(0, 0, 80, 24);
+        p.fill("white");
+        p.textFont("16px sans-serif");
+        p.text(p.frameRate().toFixed(1) + "fps", 8, 16);
+      }
+
+      { // Mouse position
+        const text = `(${p.mouseX.toFixed(0)}, ${p.mouseY.toFixed(0)})`;
+        p.fill("black");
+        p.rect(p.mouseX, p.mouseY, p.textWidth(text) + 10, -24);
+        p.fill("white")
+        p.textFont("16px sans-serif");
+        p.text(text, p.mouseX + 4, p.mouseY - 7);
+      }
+    };
+  };
 
   const randomPrettyColorHsl = (): Color =>
     randomHsl([0, 0.7, 0.45], [359, 1, 0.8]);
@@ -91,7 +108,7 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
   // Draws tree using level-order traversal so that all segments with the same
   // color can be drawn as a single path.
   function drawTree(
-    ctx: CanvasRenderingContext2D,
+    p: P5CanvasInstance,
     frameCount: number,
     x: number,
     y: number,
@@ -110,7 +127,7 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
       colorLeaf: colorTip,
     } = config;
 
-    ctx.lineCap = "round";
+    const savedStrokeStyle = p.drawingContext.strokeStyle;
 
     currLevel[0] = x;
     currLevel[1] = y;
@@ -118,11 +135,7 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
     currLevel[3] = (3 / 2) * Math.PI;
 
     for (let depth = 0; depth < maxDepth; depth++) {
-      ctx.beginPath();
-      ctx.strokeStyle = rgbString(
-        lerpColors(depth / maxDepth, colorBase, colorTip),
-      );
-      ctx.lineWidth = map(depth, 0, maxDepth, lineWidthMax, lineWidthMin);
+
       const angleOffset =
         0.1 * Math.sin((frameCount - 15 * Math.pow(depth, 2)) * 0.002);
       for (let i = 0; i < 1 << depth; i++) {
@@ -133,9 +146,21 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
 
         const endX = x + length * Math.cos(angle);
         const endY = y + length * Math.sin(angle);
-        if (lineSegmentIsVisible(ctx, x, y, endX, endY)) {
-          ctx.moveTo(x, y);
-          ctx.lineTo(endX, endY);
+
+        if (lineSegmentIsVisible(p, x, y, endX, endY)) {
+          const [r, g, b] = lerpColors(depth / maxDepth, colorBase, colorTip);
+          const [endR, endG, endB] = lerpColors((depth + 1) / maxDepth, colorBase, colorTip);
+          
+          const gradient = (p.drawingContext as CanvasRenderingContext2D).createLinearGradient(x, y, endX, endY);
+
+          gradient.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
+          gradient.addColorStop(1, `rgb(${endR}, ${endG}, ${endB})`);
+
+          p.drawingContext.strokeStyle = gradient;
+
+          p.strokeWeight(map(depth, 0, maxDepth, lineWidthMax, lineWidthMin));
+
+          p.line(x, y, endX, endY);
         }
 
         if (depth < maxDepth - 1) {
@@ -152,26 +177,26 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
           nextLevel[4 * j + 3] = angle + angleRight + angleOffset;
         }
       }
-      ctx.stroke();
       [currLevel, nextLevel] = [nextLevel, currLevel];
     }
+
+    p.drawingContext.strokeStyle = savedStrokeStyle;
   }
 
   const lineSegmentIsVisible = (
-    ctx: CanvasRenderingContext2D,
+    p: P5CanvasInstance,
     x0: number,
     y0: number,
     x1: number,
     y1: number,
   ): boolean => {
-    return true;
-    const { width, height } = ctx.canvas;
+    const { width, height } = p;
 
     // If neither of the line segment's endpoints are visible yet it still
     // crosses the screen, then it must cross at least one of the screen's side.
     return (
-      inBounds(ctx, x0, y0) ||
-      inBounds(ctx, x1, y1) ||
+      inBounds(p, x0, y0) ||
+      inBounds(p, x1, y1) ||
       intersectsHorizontalSide(x0, y0, x1, y1, 0, width) ||
       intersectsHorizontalSide(x0, y0, x1, y1, height, width) ||
       intersectsVerticalSide(x0, y0, x1, y1, 0, height) ||
@@ -180,11 +205,12 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
   };
 
   const inBounds = (
-    ctx: CanvasRenderingContext2D,
+    p: P5CanvasInstance,
     x: number,
     y: number,
   ): boolean =>
-    x >= 0 && x < ctx.canvas.width && y >= 0 && y < ctx.canvas.height;
+    x >= 0 && x < p.width && y >= 0 && y < p.height;
+
 
   const intersectsVerticalSide = (
     x0: number,
@@ -212,5 +238,5 @@ function TreeAnimation({ ...props }: ComponentProps<"canvas">) {
     return x + EPS >= 0 && x - EPS <= w;
   };
 
-  return <canvas ref={canvas} {...props} />;
+  return <NextReactP5Wrapper sketch={sketch} />;
 }
